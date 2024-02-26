@@ -1,8 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ModerationService } from './moderation.service';
-import axios from 'axios';
+import { axios } from '../lib/axios';
+import * as dotenv from 'dotenv';
 
-jest.mock('axios');
+dotenv.config({ path: '.env' });
+
+jest.mock('../lib/axios');
 
 describe('ModerationService', () => {
   let service: ModerationService;
@@ -24,15 +27,14 @@ describe('ModerationService', () => {
     const language = 'en';
     const prediction = 0.8;
 
-    (axios.post as jest.Mock).mockResolvedValueOnce({ data: { prediction } });
+    (axios.get as jest.Mock).mockResolvedValueOnce({ data: { prediction } });
 
     const result = await service.getPrediction(text, language);
 
     expect(result).toBe(prediction);
-    expect(axios.post).toHaveBeenCalledWith(
-      'https://moderation.logora.fr/predict',
-      { text, language },
-    );
+    expect(axios.get).toHaveBeenCalledWith('/predict', {
+      params: { text, language },
+    });
   });
 
   it('should get score', async () => {
@@ -40,14 +42,13 @@ describe('ModerationService', () => {
     const language = 'en';
     const score = 0.9;
 
-    (axios.post as jest.Mock).mockResolvedValueOnce({ data: { score } });
+    (axios.get as jest.Mock).mockResolvedValueOnce({ data: { score } });
 
     const result = await service.getScore(text, language);
 
     expect(result).toBe(score);
-    expect(axios.post).toHaveBeenCalledWith(
-      'https://moderation.logora.fr/score',
-      { text, language },
-    );
+    expect(axios.get).toHaveBeenCalledWith('/score', {
+      params: { text, language },
+    });
   });
 });
