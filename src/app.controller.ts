@@ -1,12 +1,32 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Body, Controller, Post } from '@nestjs/common';
+import { ModerationService } from './moderation/moderation.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly moderationService: ModerationService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Post('predict')
+  async predictModeration(@Body() body: { text: string; language: string }) {
+    try {
+      const { text, language } = body;
+      const prediction = await this.moderationService.getPrediction(
+        text,
+        language,
+      );
+      return { prediction };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Post('score')
+  async calculateScore(@Body() body: { text: string; language: string }) {
+    try {
+      const { text, language } = body;
+      const score = await this.moderationService.getScore(text, language);
+      return { score };
+    } catch (error) {
+      throw error;
+    }
   }
 }
